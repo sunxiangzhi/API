@@ -1,13 +1,37 @@
 <?php 
 
-	//接受请求响应数据
-	$pdo = new PDO('mysql:host=localhost;dbname=zhihu;charset=utf8','root','');
+	error_reporting('E_ALL & ~e_notice');
 
-	$stmt = $pdo->query('select * from api');
+	//业务逻辑异常
+	try{
 
-	$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		if(empty($_POST['username'])){
+			throw new Exception('缺少username必填参数');
+		}
 
+		if(empty($_POST['password'])){
+			throw new Exception('缺少password必填参数');
+		}
 
+	}catch(Exception $e){
+		echo resp([],401,$e->getMessage());
+		exit;
+	}
+
+	//处理服务器未知异常
+	try{
+		$pdo = new PDO('mysql:host=localhost;dbname=zhihu;charset=utf8','root','');
+
+		$stmt = $pdo->query('select * from api');
+
+		$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+	}catch(Exception $e){
+
+		echo resp($data,401,$e->getMessage());
+		exit;
+
+	}
 
 
 	//定义标准化产出数据格式函数
@@ -25,5 +49,4 @@
 	};
 
 	echo resp($data,200,'ok');
-
  ?>
